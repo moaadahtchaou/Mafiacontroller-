@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { type Player } from '../../App';
@@ -17,24 +17,19 @@ export const Step3PlayerNames: React.FC<Step3Props> = ({
   onNext,
   onBack,
 }) => {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [error, setError] = useState<string>('');
-
-  useEffect(() => {
+  const [players, setPlayers] = useState<Player[]>(() => {
     if (initialPlayers.length === totalPlayers) {
-      setPlayers(initialPlayers);
-    } else {
-      // Initialize empty players
-      const newPlayers: Player[] = Array.from({ length: totalPlayers }).map((_, i) => ({
-        id: `player-${i}`,
-        name: '',
-        isNarrator: i === 0, // Default first player to narrator
-        role: '',
-        hasSeenRole: false,
-      }));
-      setPlayers(newPlayers);
+      return initialPlayers;
     }
-  }, [totalPlayers, initialPlayers]);
+    return Array.from({ length: totalPlayers }).map((_, i) => ({
+      id: `player-${i}`,
+      name: '',
+      isNarrator: i === 0,
+      role: '',
+      hasSeenRole: false,
+    }));
+  });
+  const [error, setError] = useState<string>('');
 
   const handleNameChange = (index: number, name: string) => {
     const newPlayers = [...players];

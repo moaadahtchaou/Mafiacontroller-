@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Shield, Skull, Search, User } from 'lucide-react';
 import { type RoleCounts } from '../../App';
@@ -22,10 +22,6 @@ export const Step2RoleConfig: React.FC<Step2Props> = ({
   // 1 for Narrator
   const currentlyAssigned = roles.mafia + roles.doctor + roles.detective + 1;
   const remainingVillagers = totalPlayers - currentlyAssigned;
-
-  useEffect(() => {
-    setRoles((prev) => ({ ...prev, villager: Math.max(0, remainingVillagers) }));
-  }, [remainingVillagers]);
 
   const handleIncrement = (role: keyof RoleCounts) => {
     if (remainingVillagers > 0) {
@@ -52,48 +48,10 @@ export const Step2RoleConfig: React.FC<Step2Props> = ({
       setError('Too many special roles assigned!');
       return;
     }
-    onNext({ ...roles, villager: remainingVillagers });
+    onNext({ ...roles, villager: Math.max(0, remainingVillagers) });
   };
 
-  const RoleRow = ({
-    name,
-    count,
-    icon: Icon,
-    colorClass,
-    roleKey,
-  }: {
-    name: string;
-    count: number;
-    icon: any;
-    colorClass: string;
-    roleKey: keyof Omit<RoleCounts, 'villager'>;
-  }) => (
-    <div className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800">
-      <div className="flex items-center gap-4">
-        <div className={`p-3 rounded-full ${colorClass} bg-opacity-10 text-current`}>
-          <Icon size={24} />
-        </div>
-        <span className="font-semibold text-lg">{name}</span>
-      </div>
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => handleDecrement(roleKey)}
-          disabled={count === 0}
-          className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 disabled:opacity-50 text-xl font-bold"
-        >
-          -
-        </button>
-        <span className="w-8 text-center text-xl font-mono">{count}</span>
-        <button
-          onClick={() => handleIncrement(roleKey)}
-          disabled={remainingVillagers <= 0}
-          className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 disabled:opacity-50 text-xl font-bold"
-        >
-          +
-        </button>
-      </div>
-    </div>
-  );
+
 
   return (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -109,6 +67,9 @@ export const Step2RoleConfig: React.FC<Step2Props> = ({
           roleKey="mafia"
           icon={Skull}
           colorClass="text-mafia-red bg-mafia-red/10"
+          handleIncrement={handleIncrement}
+          handleDecrement={handleDecrement}
+          remainingVillagers={remainingVillagers}
         />
         <RoleRow
           name="Doctor"
@@ -116,6 +77,9 @@ export const Step2RoleConfig: React.FC<Step2Props> = ({
           roleKey="doctor"
           icon={Shield}
           colorClass="text-doctor-blue bg-doctor-blue/10"
+          handleIncrement={handleIncrement}
+          handleDecrement={handleDecrement}
+          remainingVillagers={remainingVillagers}
         />
         <RoleRow
           name="Detective"
@@ -123,6 +87,9 @@ export const Step2RoleConfig: React.FC<Step2Props> = ({
           roleKey="detective"
           icon={Search}
           colorClass="text-detective-amber bg-detective-amber/10"
+          handleIncrement={handleIncrement}
+          handleDecrement={handleDecrement}
+          remainingVillagers={remainingVillagers}
         />
 
         <div className="mt-8 p-4 bg-zinc-900 rounded-2xl border border-zinc-800/50 flex items-center justify-between">
@@ -150,3 +117,49 @@ export const Step2RoleConfig: React.FC<Step2Props> = ({
     </div>
   );
 };
+
+const RoleRow = ({
+  name,
+  count,
+  icon: Icon,
+  colorClass,
+  roleKey,
+  handleIncrement,
+  handleDecrement,
+  remainingVillagers,
+}: {
+  name: string;
+  count: number;
+  icon: React.ElementType;
+  colorClass: string;
+  roleKey: keyof Omit<RoleCounts, 'villager'>;
+  handleIncrement: (roleKey: keyof RoleCounts) => void;
+  handleDecrement: (roleKey: keyof Omit<RoleCounts, 'villager'>) => void;
+  remainingVillagers: number;
+}) => (
+  <div className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800">
+    <div className="flex items-center gap-4">
+      <div className={`p-3 rounded-full ${colorClass} bg-opacity-10 text-current`}>
+        <Icon size={24} />
+      </div>
+      <span className="font-semibold text-lg">{name}</span>
+    </div>
+    <div className="flex items-center gap-4">
+      <button
+        onClick={() => handleDecrement(roleKey)}
+        disabled={count === 0}
+        className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 disabled:opacity-50 text-xl font-bold"
+      >
+        -
+      </button>
+      <span className="w-8 text-center text-xl font-mono">{count}</span>
+      <button
+        onClick={() => handleIncrement(roleKey)}
+        disabled={remainingVillagers <= 0}
+        className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 disabled:opacity-50 text-xl font-bold"
+      >
+        +
+      </button>
+    </div>
+  </div>
+);
